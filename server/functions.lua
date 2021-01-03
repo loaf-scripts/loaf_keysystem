@@ -1,0 +1,1 @@
+ESXEvent = "esx:getSharedObject"
