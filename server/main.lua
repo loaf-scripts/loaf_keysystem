@@ -1,6 +1,6 @@
 ESX = nil
 
-TriggerEvent(ESXEvent or "esx:getSharedObject", function(obj) 
+TriggerEvent("esx:getSharedObject", function(obj) 
     ESX = obj 
 end)
 
