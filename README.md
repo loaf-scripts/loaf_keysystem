@@ -1,7 +1,7 @@
 # loaf_keysystem
-Key system / API for ESX. 
+Key system for ESX. 
 
-This is a resource that is goind to be used by some of the resources I sell.
+This is a resource that is going to be used by some of the resources I make.
 You are free to do whatever you want with this resource, however, **you are not allowed to sell this resource**. You are allowed to modify the resource and upload on other sites, but you are not allowed to profit off of this resource.
 
 ## ALPHA
@@ -19,16 +19,26 @@ end)
 
 To get a list of all keys, do like this:
 ```lua
-TriggerEvent("getKeys", 1, function(keys)
-    if keys then
-        for k, v in pairs(keys) do
-            local doing = true
-            TriggerEvent("removeKey", 1, k, function()
-                doing = false
-            end)
-            while doing do Wait(50) end
-        end
+TriggerEvent("getKeys", source, function(keys)
+  if keys then
+    for k, v in pairs(keys) do
+      local key_id = v.key_id
+      local unique_id = v.unique_id
     end
+  else
+    print("Couldn't get keys")
+  end
+end)
+```
+
+To remove a key, do like this:
+```lua
+TriggerEvent("removeKey", source, unique_id, function(removed)
+  if removed then
+    print("Key removed!")
+  else
+    print("Key couldn't be removed :/")
+  end
 end)
 ```
 
