@@ -6,6 +6,7 @@ You are free to do whatever you want with this resource, however, **you are not 
 
 ## ALPHA
 Please not that this resource is in alpha. Expect bugs and issues. 
+If you find any issues, please report them to me on discord @Loaf Scripts#7785, or open an issue here on GitHub.
 
 ## Usage for resource developers
 This guide is not finished. This resource is a W.I.P.
