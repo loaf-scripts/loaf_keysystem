@@ -149,7 +149,7 @@ RemoveKey = function(source, unique_id)
                     doingQuery = false
                 end
             else
-                ddoingQuery = false
+                doingQuery = false
             end
         end)
 
