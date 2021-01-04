@@ -108,8 +108,6 @@ GenerateKey = function(source, key, name)
             Wait(50)
         end
 
-        -- MySQL.Async.execute("INSERT INTO `loaf_keys` (`identifier`, `keys`) VALUES (@identifier, @timeleft)",{['@identifier'] = identifier, ['timeleft'] = 0})
-
         return id
     else
         return false
@@ -344,21 +342,3 @@ ESX.RegisterServerCallback('loaf_keysystem:transferKey', function(src, cb, playe
         cb(false)
     end
 end)
-
--- TriggerEvent("generateKey", 1, "house_2", "Husnyckel 2 :)", function()
---     TriggerEvent("getKeys", 1, function(keys)
---         if keys then
---             for k, v in pairs(keys) do
---                 local doing = true
---                 TriggerEvent("removeKey", 1, k, function()
---                     doing = false
---                 end)
---                 while doing do Wait(50) end
---             end
---         end
---     end)
--- end)
-
--- print(GenerateId(10))
-
--- print(GenerateKey(1, "test"))
