@@ -2,7 +2,7 @@
 Key system for ESX. 
 
 This is a resource that is going to be used by some of the resources I make.
-You are free to do whatever you want with this resource, however, **you are not allowed to sell this resource**. You are allowed to modify the resource and upload on other sites, but you are not allowed to profit off of this resource.
+You are free to do whatever you want with this resource, however, **you are not allowed to sell this resource**. You are allowed to modify the resource and upload on other sites, but you are not allowed to profit off of this resource, or claim that it is yours.
 
 ## ALPHA
 Please not that this resource is in alpha. Expect bugs and issues. 
