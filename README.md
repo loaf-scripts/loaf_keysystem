@@ -13,7 +13,13 @@ This guide is not finished. This resource is a W.I.P.
 
 You can only generate keys from server side code (security reasons). To generate a key, do like this:
 ```lua
-TriggerEvent("generateKey", source, key_id, key_label, eventtype --[[server or client or false]], eventname --[[the event name to trigger upon usage, or false]], function()
+TriggerEvent("generateKey", 
+              source --[[the source (playerid) of who should get the key]], 
+              key_id, --[[the key id, for example car_key_ABC123]]
+              key_label, --[[the label of the key]]
+              eventtype --[[server or client or false]], 
+              eventname --[[the event name to trigger upon usage, or false]], 
+function() --[[callback]]
   print("key has been generated")
 end)
 ```
