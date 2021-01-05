@@ -25,7 +25,7 @@ CreateThread(function()
             local elements = {}
             if keys then
                 for k, v in pairs(keys) do
-                    table.insert(elements, {label = v.name or v.key_id, id = v.key_id, unique_id = v.unique_id})
+                    table.insert(elements, {label = v.name or v.key_id, id = v.key_id, unique_id = v.unique_id, data = v})
                 end
             else
                 table.insert(elements, {label = Strings["no_keys"]})
@@ -112,6 +112,14 @@ CreateThread(function()
                     elseif currentValue == "use" then
                         if key_usages[currentKey] then
                             key_usages[currentKey](currentKey)
+                        end
+
+                        if data.current.data and data.current.data.eventtype then
+                            if data.current.data.eventtype == "server" and data.current.data.eventname then
+                                TriggerServerEvent(data.current.data.eventname, data.current.data)
+                            elseif data.current.data.eventtype == "client" and data.current.data.eventname then
+                                TriggerEvent(data.current.data.eventname, data.current.data)
+                            end
                         end
                     end
     

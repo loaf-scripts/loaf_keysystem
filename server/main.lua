@@ -6,7 +6,9 @@ end)
 
 local debugging = true
 local debugprint = function(text)
-    print(string.format("^1[%s - DEBUG]^0: %s", GetCurrentResourceName(), text))
+    if debugging then
+        print(string.format("^1[%s - DEBUG]^0: %s", GetCurrentResourceName(), text))
+    end
 end
 
 GenerateId = function(length, disableCharacters, disableNumbers, disableUppercase)
@@ -35,7 +37,7 @@ GenerateId = function(length, disableCharacters, disableNumbers, disableUppercas
     return id
 end
 
-GenerateKey = function(source, key, name)
+GenerateKey = function(source, key, name, eventtype, eventname)
     local xPlayer = ESX.GetPlayerFromId(source)
     if xPlayer and xPlayer.identifier then
         local found, id = false, GenerateId(15)
@@ -81,6 +83,14 @@ GenerateKey = function(source, key, name)
                 unique_id = id,
                 key_id = key
             }
+
+            if eventtype and eventname and type(eventtype) == "string" and type(eventname) == "string" then
+                toadd.eventtype = eventtype
+                toadd.eventname = eventname
+                debugprint("Generating with eventtype & eventname.")
+            else
+                debugprint("Generating without eventtype & eventname.")
+            end
 
             if name and type(name) == "string" then
                 toadd.name = name
@@ -285,12 +295,12 @@ TransferKey = function(old, new, unique_id)
 end
 
 RegisterNetEvent("generateKey")
-AddEventHandler("generateKey", function(playerid, key, name, cb)
+AddEventHandler("generateKey", function(playerid, key, name, eventtype, eventname, cb)
     local src = source
     
     if type(src) == "string" then -- if it was triggered by the server
         if playerid and type(playerid) == "number" and key and type(key) == "string" then
-            GenerateKey(playerid, key, name)
+            GenerateKey(playerid, key, name, eventtype, eventname)
             if cb then cb(GetKeys(playerid)) end
         end
     end
