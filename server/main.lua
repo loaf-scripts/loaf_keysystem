@@ -44,18 +44,33 @@ GenerateKey = function(source, key, name, eventtype, eventname)
         
         while not found do
             local doingQuery = true
-            MySQL.Async.fetchScalar("SELECT `unique_id` FROM `unique_keys` WHERE `unique_id` = @id", {
+            MySQL.Async.fetchScalar("SELECT `unique_id` FROM `loaf_keys` WHERE `unique_id` = @id", {
                 ["@id"] = id
             }, function(result)
                 if result == nil then
-                    MySQL.Async.execute("INSERT INTO `unique_keys` (`unique_id`) VALUES (@id)", {
-                        ["@id"] = id
+                    local key_data = {
+                        name = name or key,
+                        key_id = key,
+                        unique_id = id,
+                    }
+
+                    if eventtype and eventname and type(eventtype) == "string" and type(eventname) == "string" then
+                        key_data.eventtype = eventtype
+                        key_data.eventname = eventname
+                        debugprint("Generating with eventtype & eventname.")
+                    else
+                        debugprint("Generating without eventtype & eventname.")
+                    end
+
+                    MySQL.Async.execute("INSERT INTO `loaf_keys` (`unique_id`, `key_id`, `identifier`, `key_data`) VALUES (@id, @key_id, @identifier, @data)", {
+                        ["@id"] = id,
+                        ["@key_id"] = key,
+                        ["@identifier"] = xPlayer.identifier,
+                        ["@data"] = json.encode(key_data)
                     })
 
                     found = true
-                    debugprint("Found a unique id: " .. id)
-                else
-                    debugprint("Id was taken: " .. id)
+                    debugprint("Inserted into the database with unique id: " .. id)
                 end
                 doingQuery = false
             end)
@@ -67,110 +82,17 @@ GenerateKey = function(source, key, name, eventtype, eventname)
             Wait(50)
         end
 
-        local doingQuery = true
-
-        MySQL.Async.fetchScalar("SELECT `keys` FROM `loaf_keys` WHERE `identifier` = @id", {
-            ["@id"] = xPlayer.identifier
-        }, function(result)
-            local keys, hadKey = {}
-            if result ~= nil then
-                keys = json.decode(result)
-                debugprint("Had keys: " .. result)
-                hadKey = true
-            end
-
-            local toadd = {
-                unique_id = id,
-                key_id = key
-            }
-
-            if eventtype and eventname and type(eventtype) == "string" and type(eventname) == "string" then
-                toadd.eventtype = eventtype
-                toadd.eventname = eventname
-                debugprint("Generating with eventtype & eventname.")
-            else
-                debugprint("Generating without eventtype & eventname.")
-            end
-
-            if name and type(name) == "string" then
-                toadd.name = name
-            end
-
-            table.insert(keys, toadd)
-
-            if not hadKey then
-                MySQL.Async.execute("INSERT INTO `loaf_keys` (`identifier`, `keys`) VALUES (@identifier, @key)", {
-                    ["@identifier"] = xPlayer.identifier, 
-                    ["@key"] = json.encode(keys)
-                })
-                debugprint("Inserted inte keys for '" .. xPlayer.identifier .. "': " .. json.encode(keys))
-            else
-                MySQL.Async.execute("UPDATE `loaf_keys` SET `keys`=@key WHERE `identifier`=@identifier", {
-                    ["@identifier"] = xPlayer.identifier, 
-                    ["@key"] = json.encode(keys)
-                })
-                debugprint("Updated keys to: " .. json.encode(keys))
-            end
-            doingQuery = false
-        end)
-
-        while doingQuery do
-            Wait(50)
-        end
-
         return id
     else
         return false
     end
 end
 
-RemoveKey = function(source, unique_id)
-    local xPlayer = ESX.GetPlayerFromId(source)
-    if xPlayer and xPlayer.identifier and unique_id and type(unique_id) == "string" then
-
-        local doingQuery, toReturn = true, false
-        MySQL.Async.fetchScalar("SELECT `keys` FROM `loaf_keys` WHERE `identifier` = @id", {
-            ["@id"] = xPlayer.identifier
-        }, function(result)
-            if result then
-                local keys = json.decode(result)
-                if keys then
-                    local new_keys = {}
-                    for k, v in pairs(keys) do
-                        if v.unique_id ~= unique_id then
-                            table.insert(new_keys, v)
-                        end
-                    end
-
-                    MySQL.Async.execute("UPDATE `loaf_keys` SET `keys`=@key WHERE `identifier`=@identifier", {
-                        ["@identifier"] = xPlayer.identifier, 
-                        ["@key"] = json.encode(new_keys)
-                    }, function()
-                        debugprint("Removed key for user: " .. unique_id)
-                        MySQL.Async.execute("DELETE FROM `unique_keys` WHERE `unique_id`=@id", {
-                            ["@id"] = unique_id
-                        }, function()
-                            debugprint("Deleted from unique_keys: " .. unique_id)
-                            doingQuery = false
-                            toReturn = true
-                        end)
-                    end)
-                else
-                    doingQuery = false
-                end
-            else
-                doingQuery = false
-            end
-        end)
-
-        while doingQuery do
-            Wait(50)
-        end
-
-        return toReturn
-    else
-        return false
-    end
+RemoveKey = function(unique_id)
+    MySQL.Async.execute("DELETE FROM `loaf_keys` WHERE `unique_id` = @id", {
+        ["@id"] = unique_id,
+    })
+    return true
 end
 
 GetKeys = function(source)
@@ -178,18 +100,14 @@ GetKeys = function(source)
     if xPlayer and xPlayer.identifier then
 
         local doingQuery, toReturn = true, false
-        MySQL.Async.fetchScalar("SELECT `keys` FROM `loaf_keys` WHERE `identifier` = @id", {
-            ["@id"] = xPlayer.identifier
+        MySQL.Async.fetchAll("SELECT `unique_id`, `key_id`, `key_data` FROM `loaf_keys` WHERE `identifier` = @identifier", {
+            ["@identifier"] = xPlayer.identifier
         }, function(result)
-            if result then
-                local keys = json.decode(result)
-                if keys then
-                    toReturn = keys
-                else
-                    toReturn = {}
-                end
+            if result and type(result) == "table" then
+                toReturn = result
+            else
+                toReturn = {}
             end
-
             doingQuery = false
         end)
 
@@ -208,80 +126,18 @@ TransferKey = function(old, new, unique_id)
     if oldPlayer and newPlayer and oldPlayer.identifier and newPlayer.identifier and unique_id and type(unique_id) == "string" then
         local toReturn, doingQuery = false, true
 
-        MySQL.Async.fetchScalar("SELECT `keys` FROM `loaf_keys` WHERE `identifier` = @id", {
-            ["@id"] = oldPlayer.identifier
+        MySQL.Async.fetchScalar("SELECT `identifier` FROM `loaf_keys` WHERE `unique_id` = @id", {
+            ["@id"] = unique_id
         }, function(result)
-            if result then
-                local keys = json.decode(result)
-                local oldkeydata = false
-                if keys then
-                    for k, v in pairs(keys) do
-                        if v.unique_id == unique_id then
-                            oldkeydata = v
-                            break
-                        end
-                    end
-                end
-
-                if keys and oldkeydata then
-
-                    local new_keys_previous = {} -- new table for previous owner
-                    for k, v in pairs(keys) do
-                        if v.unique_id ~= unique_id then
-                            table.insert(new_keys_previous, v)
-                        end
-                    end
-                    
-                    MySQL.Async.fetchScalar("SELECT `keys` FROM `loaf_keys` WHERE `identifier` = @id", {
-                        ["@id"] = newPlayer.identifier
-                    }, function(result)
-                        new_keys_new = {}
-
-                        if result then
-                            local keys1 = json.decode(result)
-                            for k, v in pairs(keys1) do
-                                table.insert(new_keys_new, v)
-                            end
-                        end
-
-                        table.insert(new_keys_new, oldkeydata)
-
-                        MySQL.Async.execute("UPDATE `loaf_keys` SET `keys`=@key WHERE `identifier`=@identifier", {
-                            ["@identifier"] = oldPlayer.identifier, 
-                            ["@key"] = json.encode(new_keys_previous)
-                        }, function()
-                            debugprint("Removed key from old owner.")
-
-                            if result then
-                                MySQL.Async.execute("UPDATE `loaf_keys` SET `keys`=@key WHERE `identifier`=@identifier", {
-                                    ["@identifier"] = newPlayer.identifier, 
-                                    ["@key"] = json.encode(new_keys_new)
-                                }, function()
-                                    debugprint("Added key to new owner.")
-                                    toReturn = true
-                                    doingQuery = false
-                                end)
-                            else
-                                MySQL.Async.execute("INSERT INTO `loaf_keys` (`identifier`, `keys`) VALUES (@identifier, @key)", {
-                                    ["@identifier"] = newPlayer.identifier, 
-                                    ["@key"] = json.encode(new_keys_new)
-                                }, function()
-                                    debugprint("Inserted key to new owner.")
-                                    toReturn = true
-                                    doingQuery = false
-                                end)
-                            end
-                        end)
-                    end)
-
-                else
-                    debugprint("Didn't have key with id: " .. unique_id)
-                    doingQuery = false
-                end
-            else
-                debugprint("No keys.")
-                doingQuery = false
+            if result and result == oldPlayer.identifier then
+                MySQL.Sync.execute("UPDATE `loaf_keys` set `identifier`=@new_identifier WHERE `identifier`=@old_identifier", {
+                    ["@new_identifier"] = newPlayer.identifier,
+                    ["@old_identifier"] = oldPlayer.identifier
+                })
+                toReturn = true
             end
+            
+            doingQuery = false
         end)
 
         while doingQuery do 
@@ -328,6 +184,44 @@ AddEventHandler("removeKey", function(playerid, key, cb)
     end
 end)
 
+RegisterNetEvent("removeAllKeys")
+AddEventHandler("removeAllKeys", function(key)
+    local src = source
+    if type(src) == "string" then -- if it was triggered by the server
+        if key and type(key) == "string" then
+            MySQL.Async.execute("DELETE FROM `loaf_keys` WHERE `key_id` = @key", {
+                ["@key"] = key
+            })
+        end
+    end
+end)
+
+ESX.RegisterServerCallback("loaf_keysystem:removeKey", function(src, cb, unique_id)
+    local xPlayer = ESX.GetPlayerFromId(src)
+
+    if xPlayer and xPlayer.identifier and unique_id and type(unique_id) == "string" then
+
+        local toReturn, doingQuery = false, true
+
+        MySQL.Async.fetchScalar("SELECT `identifier` FROM `loaf_keys` WHERE `unique_id` = @id", {
+            ["@id"] = unique_id
+        }, function(result)
+            if result and result == xPlayer.identifier then
+                RemoveKey(unique_id)
+                toReturn = true
+            end
+            
+            doingQuery = false
+        end)
+
+        while doingQuery == true do
+            Wait(50)
+        end
+        
+        cb(toReturn)
+    end
+end)
+
 ESX.RegisterServerCallback("loaf_keysystem:getKeys", function(src, cb)
     cb(GetKeys(src))
 end)
@@ -345,7 +239,7 @@ ESX.RegisterServerCallback("loaf_keysystem:getRpName", function(src, cb, player)
     end
 end)
 
-ESX.RegisterServerCallback('loaf_keysystem:transferKey', function(src, cb, playerid, unique_id)
+ESX.RegisterServerCallback("loaf_keysystem:transferKey", function(src, cb, playerid, unique_id)
     if playerid and unique_id then
         cb(TransferKey(src, playerid, unique_id))
     else
