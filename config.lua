@@ -16,4 +16,5 @@ Strings = {
     ["confirm_remove"] = "Remove key?",
     ["yes"] = "Yes",
     ["no"] = "No",
+    ["recieved_key"] = "You got a key.",
 }
