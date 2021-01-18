@@ -69,6 +69,8 @@ GenerateKey = function(source, key, name, eventtype, eventname)
                         ["@data"] = json.encode(key_data)
                     })
 
+                    xPlayer.showNotification(Strings["recieved_key"])
+
                     found = true
                     debugprint("Inserted into the database with unique id: " .. id)
                 end
@@ -130,9 +132,10 @@ TransferKey = function(old, new, unique_id)
             ["@id"] = unique_id
         }, function(result)
             if result and result == oldPlayer.identifier then
-                MySQL.Sync.execute("UPDATE `loaf_keys` set `identifier`=@new_identifier WHERE `identifier`=@old_identifier", {
+                MySQL.Sync.execute("UPDATE `loaf_keys` set `identifier`=@new_identifier WHERE `identifier`=@old_identifier AND `unique_id`=@unique_id", {
                     ["@new_identifier"] = newPlayer.identifier,
-                    ["@old_identifier"] = oldPlayer.identifier
+                    ["@old_identifier"] = oldPlayer.identifier,
+                    ["@unique_id"] = unique_id
                 })
                 toReturn = true
             end
