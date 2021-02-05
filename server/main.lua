@@ -119,7 +119,7 @@ GetKeys = function(source)
 
         return toReturn
     else
-        return false
+        return {}
     end
 end
 
