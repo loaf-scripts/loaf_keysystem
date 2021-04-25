@@ -4,21 +4,26 @@ Key system for ESX.
 This is a resource that is going to be used by some of the resources I make.
 You are free to do whatever you want with this resource, however, **you are not allowed to sell this resource**. You are allowed to modify the resource and upload on other sites, but you are not allowed to profit off of this resource, or claim that it is yours.
 
-## ALPHA
-Please note that this resource is in alpha. Expect bugs and issues. 
 If you find any issues, please report them to me on discord @Loaf Scripts#7785, or open an issue here on GitHub.
 
 ## Usage for resource developers
 This guide is not finished. This resource is a W.I.P.
 
+#### Exports
+Export | Client args | Server args
+  ---  |        ---       |       ---
+HasKey | key_id [string]  | source [number], key_id [string]
+GetKeys| none             | source [number]
+
+#### Events
 You can only generate keys from server side code (security reasons). To generate a key, do like this:
 ```lua
 TriggerEvent("generateKey", 
-              source --[[the source (playerid) of who should get the key]], 
+              source, --[[the source (playerid) of who should get the key]]
               key_id, --[[the key id, for example car_key_ABC123]]
               key_label, --[[the label of the key]]
-              eventtype --[[server or client or false]], 
-              eventname --[[the event name to trigger upon usage, or false]], 
+              eventtype, --[[server or client or false]]
+              eventname --[[the event name to trigger upon usage, or false]]
 function() --[[callback]]
   print("key has been generated")
 end)
@@ -48,7 +53,7 @@ end)
 
 To remove a key, do like this:
 ```lua
-TriggerEvent("removeKey", source, unique_id, function(removed)
+TriggerEvent("removeKey", unique_id, function(removed)
   if removed then
     print("Key removed!")
   else

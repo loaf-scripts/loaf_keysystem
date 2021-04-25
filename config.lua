@@ -1,5 +1,6 @@
 Config = {
     EnableESXIdentity = true, -- use firstname lastname format instead of steam / fivem names when giving keys
+    Command = "keys", -- command to open the menu
 }
 
 Strings = {
