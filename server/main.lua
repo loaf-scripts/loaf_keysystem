@@ -109,7 +109,7 @@ RemoveKey = function(unique_id)
         for index, data in pairs(keys) do
             if data.unique_id == unique_id then
                 table.remove(Keys[source], index)
-                TriggerClientEvent("loaf_keysystem:setKeys", source, Keys[source])
+                TriggerClientEvent("loaf_keysystem:setKeys", tonumber(source), Keys[source])
                 return true
             end
         end
@@ -246,6 +246,15 @@ AddEventHandler("removeAllKeys", function(key)
             MySQL.Async.execute("DELETE FROM `loaf_keys` WHERE `key_id` = @key", {
                 ["@key"] = key
             })
+
+            for source, keys in pairs(Keys) do
+                for index, data in pairs(keys) do
+                    if data.key_id == key then
+                        table.remove(Keys[source], index)
+                        TriggerClientEvent("loaf_keysystem:setKeys", tonumber(source), Keys[source])
+                    end
+                end
+            end
         end
     end
 end)
