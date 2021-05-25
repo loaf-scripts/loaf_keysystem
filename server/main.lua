@@ -231,9 +231,8 @@ RegisterNetEvent("removeKey")
 AddEventHandler("removeKey", function(key, cb)
     local src = source
     if type(src) == "string" then -- if it was triggered by the server
-        if playerid and type(playerid) == "number" and key and type(key) == "string" then
-            RemoveKey(key)
-            if cb then cb(GetKeys(playerid)) end
+        if key and type(key) == "string" then -- if a key was specified
+            RemoveKey(key) -- remove the key
         end
     end
 end)
