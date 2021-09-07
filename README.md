@@ -10,10 +10,10 @@ If you find any issues, please report them to me on discord @Loaf Scripts#7785, 
 This guide is not finished. This resource is a W.I.P.
 
 #### Exports
-Export | Client args | Server args
-  ---  |        ---       |       ---
-HasKey | key_id [string]  | source [number], key_id [string]
-GetKeys| none             | source [number]
+Export | Client args      | Server args                      | Returns
+  ---  |        ---       |                ---               |         ---
+HasKey | key_id [string]  | source [number], key_id [string] | boolean if user has key
+GetKeys| none             | source [number]                  | table of keys
 
 #### Events
 You can only generate keys from server side code (security reasons). To generate a key, do like this:
