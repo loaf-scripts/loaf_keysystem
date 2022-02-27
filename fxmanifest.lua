@@ -1,12 +1,16 @@
-fx_version 'adamant'
-game 'gta5'
-description 'ESX Key system'
-version '1.0.0'
-author 'Loaf Scripts'
+fx_version "cerulean"
+game "gta5"
+description "Keysystem for FiveM, works with ESX & QBCore."
+version "2.0.0"
+author "Loaf Scripts#7785"
 
-server_script '@mysql-async/lib/MySQL.lua'
-server_script 'server/*.lua'
-client_script 'client/*.lua'
-shared_script 'config.lua'
+shared_script "config.lua"
+server_script {
+    "@mysql-async/lib/MySQL.lua",
+    "@oxmysql/lib/MySQL.lua",
+    "logs.lua",
+    "server/*.lua"
+}
+client_script "client/*.lua"
 
-dependency 'es_extended'
+dependency "loaf_lib" -- https://github.com/loaf-scripts/loaf_lib
