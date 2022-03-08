@@ -73,10 +73,6 @@ function SetKeyUsage(keyId, cb)
 end
 exports("SetKeyUsage", SetKeyUsage)
 
-SetKeyUsage("Test2t4", function()
-    print("used key ", "Test2t4")
-end)
-
 function HasKey(keyId)
     for i, v in pairs(cache.keys) do
         if v.key_id == keyId then
