@@ -17,7 +17,16 @@ CreateThread(function()
 
     function GetIngameName(source)
         local xPlayer = ESX.GetPlayerFromId(source)
-        return xPlayer.get("firstName")  .. " " .. xPlayer.get("lastName")
+        local firstName, lastName
+        if xPlayer.get and xPlayer.get("firstName") and xPlayer.get("lastName") then
+            firstName = xPlayer.get("firstName")
+            lastName = xPlayer.get("lastName")
+        else
+            local name = MySQL.Sync.fetchAll("SELECT `firstname`, `lastname` FROM `users` WHERE `identifier`=@identifier", {["@identifier"] = GetIdentifier(source)})
+            firstName, lastName = name[1]?.firstname or GetPlayerName(source), name[1]?.lastname or ""
+        end
+
+        return ("%s %s"):format(firstName, lastName)
     end
 
     function GetSourceByIdentifier(identifier)
