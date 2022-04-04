@@ -1,6 +1,7 @@
 fx_version "cerulean"
 game "gta5"
 description "Keysystem for FiveM, works with ESX & QBCore."
+lua54 "yes"
 version "2.0.0"
 author "Loaf Scripts#7785"
 
