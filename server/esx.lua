@@ -23,7 +23,7 @@ CreateThread(function()
             lastName = xPlayer.get("lastName")
         else
             local name = MySQL.Sync.fetchAll("SELECT `firstname`, `lastname` FROM `users` WHERE `identifier`=@identifier", {["@identifier"] = GetIdentifier(source)})
-            firstName, lastName = name[1]?.firstname or GetPlayerName(source), name[1]?.lastname or ""
+            firstName, lastName = name[1].firstname or GetPlayerName(source), name[1].lastname or ""
         end
 
         return ("%s %s"):format(firstName, lastName)
