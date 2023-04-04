@@ -1,14 +1,21 @@
 CreateThread(function()
-    if Config.Framework ~= "esx" then return end
-    local ESX
-    TriggerEvent("esx:getSharedObject", function(obj) 
-        ESX = obj 
+    if Config.Framework ~= "esx" then
+        return
+    end
+
+    local export, ESX = pcall(function()
+        return exports.es_extended:getSharedObject()
     end)
+    if not export then
+        TriggerEvent("esx:getSharedObject", function(obj)
+            ESX = obj
+        end)
+    end
 
     function Notify(source, message)
         TriggerClientEvent("esx:showNotification", source, message)
     end
-    
+
     function GetIdentifier(source)
         local xPlayer = ESX.GetPlayerFromId(source)
         if not xPlayer then return false end
@@ -42,6 +49,6 @@ CreateThread(function()
     ESX.RegisterServerCallback("loaf_keysystem:getKeys", function(source, cb)
         cb(GetKeys(source))
     end)
-    
+
     loaded = true
 end)

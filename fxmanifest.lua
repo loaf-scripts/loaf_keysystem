@@ -2,7 +2,7 @@ fx_version "cerulean"
 game "gta5"
 description "Keysystem for FiveM, works with ESX & QBCore."
 lua54 "yes"
-version "2.0.0"
+version "2.0.1"
 author "Loaf Scripts#7785"
 
 shared_script "config.lua"
