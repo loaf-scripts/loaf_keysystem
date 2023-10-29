@@ -1,114 +1,135 @@
-cache = {
-    keyUsages = {}
-}
+local keys = {}
+KeyUsages = {}
 
-CreateThread(function()
-    cache.menuAlign = Config.Align or "top-right"
-    while not cache.loaded do 
-        Wait(500)
-    end
-
-    function GetPlayers()
-        local found = {}
-        for _, player in pairs(GetActivePlayers()) do
-            if player ~= PlayerId() then
-                local playerPed = GetPlayerPed(player)
-                if #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(playerPed)) <= 5.0 then
-                    local foundName, startedSearch, name = false, GetGameTimer(), GetPlayerName(player) .. " | " .. GetPlayerServerId(player)
-                    
-                    if Config.UseRPName then 
-                        name = lib.TriggerCallbackSync("loaf_keysystem:get_name", GetPlayerServerId(player)) or name 
-                    end
-
-                    found[#found+1] = {
-                        serverId = GetPlayerServerId(player),
-                        name = name
-                    }
-                end
-            end
-        end
-        return found
-    end
-
-    if Config.Command then
-        if Config.Keybind then
-            RegisterKeyMapping(Config.Command, Strings["keybind"], "keyboard", Config.Keybind)
-        end
-        RegisterCommand(Config.Command, OpenKeyMenu)
-        TriggerEvent("chat:addSuggestion", "/"..Config.Command, Strings["keybind"], {})
-    end
-end)
-
-RegisterNetEvent("loaf_keysystem:remove_key")
-AddEventHandler("loaf_keysystem:remove_key", function(uniqueId)
-    if not cache.keys then return print("keys have not loaded yet.") end
-    for i, v in pairs(cache.keys) do
-        if v.unique_id == uniqueId then
-            printf("removed key %s from cache.keys, index %i", uniqueId, i)
-            table.remove(cache.keys, i)
-            break
+local function findKey(k, v)
+    for i = 1, #keys do
+        if keys[i][k] == v then
+            return i
         end
     end
-end)
+end
 
-RegisterNetEvent("loaf_keysystem:add_key")
-AddEventHandler("loaf_keysystem:add_key", function(keyId, uniqueId, keyData)
-    if not cache.keys then return print("keys have not loaded yet.") end
-    Notify(Strings["received_key"])
-    printf("received key %s (%s) with data %s", keyId, uniqueId, json.encode({keyData}))
-    table.insert(cache.keys, {
+RegisterNetEvent("loaf_keysystem:add_key", function(keyId, uniqueId, keyData)
+    Notify(L("received_key"))
+    printf("received key %s (%s) with data %s", keyId, uniqueId, json.encode(keyData, { indent = true }))
+
+    keys[#keys+1] = {
         key_id = keyId,
         unique_id = uniqueId,
         key_data = keyData
-    })
+    }
 end)
 
-RegisterNetEvent("loaf_keysystem:openMenu")
-AddEventHandler("loaf_keysystem:openMenu", function()
-    OpenKeyMenu()
+local function removeFromCache(uniqueId)
+    local index = findKey("unique_id", uniqueId)
+    if not index then
+        printf("remove_key: key %s not found", uniqueId)
+        return
+    end
+
+    printf("removed key %s", uniqueId)
+
+    table.remove(keys, index)
+end
+
+RegisterNetEvent("loaf_keysystem:remove_key", removeFromCache)
+
+RegisterNetEvent("loaf_keysystem:remove_all_keys", function(keyId)
+    for i = 1, #keys do
+        if keys[i].key_id == keyId then
+            printf("removed key %s", keys[i].unique_id)
+            table.remove(keys, i)
+        end
+    end
 end)
 
-function SetKeyUsage(keyId, cb)
-    cache.keyUsages[keyId] = cb
+function RefreshKeys()
+    keys = lib.TriggerCallbackSync("loaf_keysystem:fetch_keys")
 end
-exports("SetKeyUsage", SetKeyUsage)
 
-function HasKey(keyId)
-    for i, v in pairs(cache.keys) do
-        if v.key_id == keyId then
-            return true
-        end
+CreateThread(function()
+    while not Loaded do
+        Wait(250)
     end
 
-    return false
-end
-exports("HasKey", HasKey)
+    RefreshKeys()
+end)
 
-function GetKeys()
-    return cache.keys
-end
-exports("GetKeys", GetKeys)
+function DeleteKey(uniqueId)
+    local success = lib.TriggerCallbackSync("loaf_keysystem:remove_key", uniqueId)
 
-function GetKey(uniqueId)
-    for i, v in pairs(cache.keys) do
-        if v.unique_id == uniqueId then
-            return v
-        end
+    if success then
+        removeFromCache(uniqueId)
     end
-    return false
+
+    return success
 end
+
+function TransferKey(uniqueId, transferTo)
+    local success = lib.TriggerCallbackSync("loaf_keysystem:transfer_key", uniqueId, transferTo)
+
+    if success then
+        removeFromCache(uniqueId)
+    end
+
+    return success
+end
+
+-- Exports
+local function setKeyUsage(keyId, cb)
+    KeyUsages[keyId] = cb
+end
+
+local function hasKey(keyId)
+    return findKey("key_id", keyId) ~= nil
+end
+
+local function getKeys()
+    return keys
+end
+
+local function GetKey(uniqueId)
+    local index = findKey("unique_id", uniqueId)
+    if not index then
+        return false
+    end
+
+    return keys[index]
+end
+
+exports("SetKeyUsage", setKeyUsage)
+exports("HasKey", hasKey)
+exports("GetKeys", getKeys)
 exports("GetKey", GetKey)
 
--- backwards compatibility, please do not use this event.
-RegisterNetEvent("loaf_keysystem:setUsage")
-AddEventHandler("loaf_keysystem:setUsage", function(keyId, cb)
-    SetKeyUsage(keyId, cb)
+RegisterNetEvent("loaf_keysystem:setUsage", setKeyUsage)
+
+RegisterNetEvent("loaf_keysystem:openMenu", function()
+    if OpenKeyMenu then
+        OpenKeyMenu(keys)
+    else
+        print("OpenKeyMenu is not defined")
+    end
 end)
 
-AddEventHandler("onResourceStop", function(resource)
-    if resource ~= GetCurrentResourceName() then return end
+-- Command
+if Config.Command then
+    if Config.Keybind then
+        RegisterKeyMapping(Config.Command, L("keybind"), "keyboard", Config.Keybind)
+    end
+
+    RegisterCommand(Config.Command, function()
+        TriggerEvent("loaf_keysystem:openMenu")
+    end, false)
+    TriggerEvent("chat:addSuggestion", "/" .. Config.Command, L("keybind"), {})
+end
+
+AddEventHandler("onResourceStop", function(resourceName)
+    if resourceName ~= GetCurrentResourceName() then
+        return
+    end
 
     if Config.Command then
-        TriggerEvent("chat:removeSuggestion", "/command")
+        TriggerEvent("chat:removeSuggestion", "/" .. Config.Command)
     end
 end)
