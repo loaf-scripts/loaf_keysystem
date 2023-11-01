@@ -12,7 +12,7 @@ Config.Framework = "auto" --[[
 
 Config.Language = "en" -- see config/locales.lua
 
-Config.MenuSystem = "ox_lib" --[[
+Config.MenuSystem = "framework" --[[
     Supported:
     -   framework (will use esx_menu_default or qb-menu)
     -   esx_context (esx context menu)

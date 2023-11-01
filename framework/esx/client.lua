@@ -161,20 +161,7 @@ if Config.MenuSystem == "framework" then
         }, function(data, menu)
             local action = data.current.value
             if action == "use" then
-                if KeyUsages[key.key_id] then
-                    KeyUsages[key.key_id](key)
-                end
-
-                local keyData = key.key_data
-                if keyData.eventname then
-                    if keyData.eventtype == "server" then
-                        TriggerServerEvent(keyData.eventname, keyData)
-                    elseif keyData.eventtype == "client" then
-                        TriggerEvent(keyData.eventname, keyData)
-                    else
-                        print("invalid eventtype: " .. keyData.eventtype)
-                    end
-                end
+                UseKey(key.unique_id)
             elseif action == "transfer" then
                 selectNearbyPlayer(key)
             elseif action == "delete" then
@@ -214,6 +201,8 @@ if Config.MenuSystem == "framework" then
         end, closeMenuHandler)
     end
 elseif Config.MenuSystem == "esx_context" then
+    local selectNearbyPlayer, individualKeyMenu, confirmTransferKey
+
     local function confirmDeleteKey(keys, key)
         ESX.OpenContext("right", {
             {
@@ -245,12 +234,10 @@ elseif Config.MenuSystem == "esx_context" then
                     Notify(L("failed_delete"))
                 end
             else
-                OpenKeyMenu(keys)
+                individualKeyMenu(keys, key)
             end
         end)
     end
-
-    local selectNearbyPlayer, individualKeyMenu, confirmTransferKey
 
     function confirmTransferKey(keys, key, player)
         ESX.OpenContext("right", {
@@ -283,6 +270,8 @@ elseif Config.MenuSystem == "esx_context" then
                 else
                     Notify(L("failed_transfer"))
                 end
+
+                TriggerEvent("loaf_keysystem:openMenu")
             else
                 selectNearbyPlayer(keys, key)
             end
@@ -293,6 +282,7 @@ elseif Config.MenuSystem == "esx_context" then
         local players = GetNearbyPlayers()
         if #players == 0 then
             Notify(L("no_one_nearby"))
+            individualKeyMenu(keys, key)
             return
         end
 
@@ -362,20 +352,7 @@ elseif Config.MenuSystem == "esx_context" then
             local action = element.value
             print(action)
             if action == "use" then
-                if KeyUsages[key.key_id] then
-                    KeyUsages[key.key_id](key)
-                end
-
-                local keyData = key.key_data
-                if keyData.eventname then
-                    if keyData.eventtype == "server" then
-                        TriggerServerEvent(keyData.eventname, keyData)
-                    elseif keyData.eventtype == "client" then
-                        TriggerEvent(keyData.eventname, keyData)
-                    else
-                        print("invalid eventtype: " .. keyData.eventtype)
-                    end
-                end
+                UseKey(key.unique_id)
             elseif action == "transfer" then
                 selectNearbyPlayer(keys, key)
             elseif action == "delete" then

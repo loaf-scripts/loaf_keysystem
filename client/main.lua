@@ -88,7 +88,7 @@ local function getKeys()
     return keys
 end
 
-local function GetKey(uniqueId)
+local function getKey(uniqueId)
     local index = findKey("unique_id", uniqueId)
     if not index then
         return false
@@ -97,10 +97,33 @@ local function GetKey(uniqueId)
     return keys[index]
 end
 
+function UseKey(uniqueId)
+    local key = getKey(uniqueId)
+    if not key then
+        return false
+    end
+
+    local keyData = key.key_data
+    if keyData.eventname then
+        if keyData.eventtype == "server" then
+            TriggerServerEvent(keyData.eventname, keyData)
+        elseif keyData.eventtype == "client" then
+            TriggerEvent(keyData.eventname, keyData)
+        else
+            print("invalid eventtype: " .. keyData.eventtype)
+        end
+    end
+
+    if KeyUsages[key.key_id] then
+        KeyUsages[key.key_id](key)
+    end
+end
+
 exports("SetKeyUsage", setKeyUsage)
 exports("HasKey", hasKey)
 exports("GetKeys", getKeys)
-exports("GetKey", GetKey)
+exports("GetKey", getKey)
+exports("UseKey", UseKey)
 
 RegisterNetEvent("loaf_keysystem:setUsage", setKeyUsage)
 

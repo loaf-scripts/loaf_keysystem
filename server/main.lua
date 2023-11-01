@@ -205,6 +205,8 @@ local function generateKey(source, keyId, name, eventtype, eventname)
     }
 
     TriggerClientEvent("loaf_keysystem:add_key", source, keyId, uniqueId, keyData)
+
+    return uniqueId
 end
 
 local function removeAllKeys(keyId)

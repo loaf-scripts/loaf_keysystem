@@ -176,20 +176,7 @@ if Config.MenuSystem == "ox_lib" then
             end
         }, function(_, _, action)
             if action == "use" then
-                if KeyUsages[key.key_id] then
-                    KeyUsages[key.key_id](key)
-                end
-
-                local keyData = key.key_data
-                if keyData.eventname then
-                    if keyData.eventtype == "server" then
-                        TriggerServerEvent(keyData.eventname, keyData)
-                    elseif keyData.eventtype == "client" then
-                        TriggerEvent(keyData.eventname, keyData)
-                    else
-                        print("invalid eventtype: " .. keyData.eventtype)
-                    end
-                end
+                UseKey(key.unique_id)
             elseif action == "transfer" then
                 selectNearbyPlayer(key)
             elseif action == "delete" then
