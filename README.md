@@ -1,7 +1,7 @@
 # Loaf - Keysystem
 
-Version 3. Works with ESX, QBCore and Standalone.
-If you find any issues, please report them to me on discord @loafscripts, or open an issue here.
+Version 3. Works with ESX, QBCore, and Standalone.
+If you encounter any issues, create a [bug report](https://discord.com/channels/668570162609520653/1164708334931296276/threads/1164711664885710998) in my [discord](https://discord.com/invite/4dUvf34) or open an [issue](https://github.com/loaf-scripts/loaf_keysystem/issues).
 
 ## Requirements
 
