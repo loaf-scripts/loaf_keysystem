@@ -1,17 +1,33 @@
 fx_version "cerulean"
 game "gta5"
-description "Keysystem for FiveM, works with ESX & QBCore."
 lua54 "yes"
-version "2.0.1"
-author "Loaf Scripts#7785"
+use_experimental_fxv2_oal "yes"
 
-shared_script "config.lua"
+name "loaf_keysystem"
+author "Loaf Scripts"
+description "Keysystem for FiveM, works with ESX, QBCore or Standalone."
+version "3.0.0"
+
+shared_script {
+    "config/*.lua",
+    "shared/*.lua",
+    "framework/shared.lua"
+}
+
+client_script {
+    "framework/**/client.lua",
+    "client/*.lua"
+}
+
 server_script {
     "@mysql-async/lib/MySQL.lua",
-    "@oxmysql/lib/MySQL.lua",
-    "logs.lua",
+    "framework/**/server.lua",
     "server/*.lua"
 }
-client_script "client/*.lua"
+
+escrow_ignore {
+    "framework/**/*.lua",
+    "config/**/*.lua"
+}
 
 dependency "loaf_lib" -- https://github.com/loaf-scripts/loaf_lib
