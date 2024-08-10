@@ -2,11 +2,11 @@ if Config.Framework ~= "esx" then
     return
 end
 
-local _, ESX = pcall(function()
+local export, ESX = pcall(function()
     return exports.es_extended:getSharedObject()
 end)
 
-if not ESX then
+if not export then
     TriggerEvent("esx:getSharedObject", function(obj)
         ESX = obj
     end)

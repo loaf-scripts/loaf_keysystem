@@ -2,11 +2,11 @@ if Config.Framework ~= "esx" then
     return
 end
 
-local _, ESX = pcall(function()
+local export, ESX = pcall(function()
     return exports.es_extended:getSharedObject()
 end)
 
-CreateThread(function()
+if not export then
     while not ESX do
         TriggerEvent("esx:getSharedObject", function(obj)
             ESX = obj
@@ -14,22 +14,22 @@ CreateThread(function()
 
         Wait(500)
     end
+end
 
-    RegisterNetEvent("esx:playerLoaded", function(playerData)
-        ESX.PlayerData = playerData
-        ESX.PlayerLoaded = true
-    end)
-
-    function Notify(text, errType)
-        ESX.ShowNotification(text, errType)
-    end
-
-    while not ESX.PlayerLoaded do
-        Wait(500)
-    end
-
-    Loaded = true
+RegisterNetEvent("esx:playerLoaded", function(playerData)
+    ESX.PlayerData = playerData
+    ESX.PlayerLoaded = true
 end)
+
+function Notify(text, errType)
+    ESX.ShowNotification(text, errType)
+end
+
+while not ESX.PlayerLoaded do
+    Wait(500)
+end
+
+Loaded = true
 
 if Config.MenuSystem == "framework" then
     local function closeMenuHandler(data, menu)
