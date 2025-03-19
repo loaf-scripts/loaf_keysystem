@@ -29,7 +29,34 @@ Locales = {
         deleted = "~r~Deleted~s~ key \"{key_name}\".",
         received_key = "You received a key.",
     },
-    sv = {
-
+    de = {
+        keybind = "Menü mit all deinen Schlüsseln.",
+        no_keys = "Du hast keine Schlüssel.",
+    
+        -- Menü
+        main_menu = "Deine Schlüssel",
+    
+        transfer_nearby = "Schlüssel übertragen",
+        use_key = "Schlüssel benutzen",
+        delete_key = "Schlüssel löschen",
+        back = "Zurück",
+        close = "Schließen",
+    
+        confirm_delete = "Schlüssel {key_name} löschen?",
+        yes = "Ja",
+        no = "Nein",
+    
+        give_to = "Geben an %s (%i)",
+        no_one_nearby = "Niemand in der Nähe.",
+    
+        confirm_transfer = "Schlüssel an {name} übertragen?",
+        failed_transfer = "Fehler beim Übertragen des Schlüssels.",
+        transferred = "{key_name} an {player_name} übertragen.",
+    
+        -- Benachrichtigungen
+        not_your_key = "Diesen Schlüssel besitzt du nicht.",
+        failed_delete = "Fehler beim Löschen des Schlüssels.",
+        deleted = "~r~Gelöscht~s~ Schlüssel \"{key_name}\".",
+        received_key = "Du hast einen Schlüssel erhalten.",
     }
 }
